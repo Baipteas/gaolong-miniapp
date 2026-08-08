@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#9f1d14" />
+  <title>GAOLONG • Order</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
+
+  <style>
+    :root{
+      --green:#c62828;
+      --green-dark:#8e1515;
+      --green-soft:#fff0e8;
+      --orange:#ff7a00;
+      --red:#b91c1c;
+      --bg:#fff7f2;
+      --card:#ffffff;
+      --text:#2b1714;
+      --muted:#7b625d;
+      --border:#f0d9d1;
+      --shadow:0 8px 24px rgba(126,24,18,.10);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Khmer",Arial,sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      padding-bottom:100px;
+    }
+
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+      padding:12px 16px;
+    }
+
+    .topbar-inner{
+      max-width:920px;
+      margin:auto;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:54px;
+      height:54px;
+      border-radius:14px;
+      overflow:hidden;
+      background:#9f1d14;
+      flex:none;
+      border:1px solid rgba(255,122,0,.45);
+    }
+
+    .logo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .brand{flex:1}
+    .brand h1{font-size:20px;margin:0;color:var(--green-dark)}
+    .brand p{font-size:12px;margin:3px 0 0;color:var(--muted)}
+
+    .cart-top{
+      border:0;
+      border-radius:14px;
+      background:var(--green);
+      color:#fff;
+      padding:10px 12px;
+      min-width:54px;
+      font-weight:700;
+    }
+
+    .hero{
+      max-width:920px;
+      margin:16px auto 0;
+      padding:0 16px;
+    }
+
+    .hero-box{
+      position:relative;
+      overflow:hidden;
+      border-radius:24px;
+      background:
+        linear-gradient(90deg,rgba(61,8,6,.90),rgba(159,29,20,.78),rgba(255,122,0,.38)),
+        url("images/gaolong-cover.png") center/cover no-repeat;
+      color:#fff;
+      padding:28px 22px;
+      min-height:150px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      box-shadow:var(--shadow);
+    }
+    .hero-box::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.20));
+      pointer-events:none;
+    }
+    .hero-box > *{position:relative;z-index:1}
+
+    .hero h2{font-size:25px;margin:0 0 8px}
+    .hero p{margin:0;opacity:.9;line-height:1.55}
+
+    .search-wrap{
+      max-width:920px;
+      margin:14px auto 0;
+      padding:0 16px;
+    }
+
+    .search{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
+      padding:13px 15px;
+      outline:none;
+    }
+
+    .search:focus{border-color:var(--green)}
+
+    .categories{
+      max-width:920px;
+      margin:12px auto 0;
+      padding:0 16px;
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      scrollbar-width:none;
+    }
+
+    .categories::-webkit-scrollbar{display:none}
+
+    .chip{
+      border:1px solid #e86f19;
+      background:#e86f19;
+      color:#fff;
+      padding:9px 14px;
+      border-radius:999px;
+      white-space:nowrap;
+      font-weight:700;
+      box-shadow:0 2px 8px rgba(232,111,25,.18);
+    }
+
+    .chip.active{
+      background:var(--green);
+      color:#fff;
+      border-color:var(--green);
+    }
+
+    .section{
+      max-width:920px;
+      margin:20px auto 0;
+      padding:0 16px;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .section-head h2{font-size:20px;margin:0}
+    .section-head span{font-size:13px;color:var(--muted)}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .food-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:0 3px 12px rgba(16,24,40,.05);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .food-image{
+      width:100%;
+      height:150px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(145deg,#fffaf7,#fff0e8);
+    }
+    .food-img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .food-emoji{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:52px;
+    }
+
+    .food-body{
+      padding:13px;
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      flex:1;
+    }
+
+    .food-category{
+      font-size:11px;
+      color:var(--green-dark);
+      background:var(--green-soft);
+      border-radius:999px;
+      padding:4px 8px;
+      align-self:flex-start;
+    }
+
+    .food-name{font-weight:750;line-height:1.4}
+    .food-desc{font-size:12px;color:var(--muted);line-height:1.45;min-height:34px}
+
+    .food-bottom{
+      margin-top:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+
+    .price{font-weight:800;color:var(--green-dark)}
+
+    .add-btn{
+      border:0;
+      background:var(--green);
+      color:#fff;
+      border-radius:12px;
+      padding:8px 11px;
+      font-weight:700;
+    }
+
+    .empty{
+      grid-column:1/-1;
+      padding:30px 20px;
+      text-align:center;
+      color:var(--muted);
+      background:#fff;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+    }
+
+    .cart-bar{
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom:max(12px,env(safe-area-inset-bottom));
+      z-index:25;
+      max-width:896px;
+      margin:auto;
+      background:var(--green);
+      color:#fff;
+      border:0;
+      border-radius:18px;
+      padding:14px 16px;
+      display:none;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 14px 36px rgba(15,92,58,.35);
+      font-weight:800;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      z-index:40;
+      background:rgba(0,0,0,.45);
+      display:none;
+      align-items:flex-end;
+    }
+
+    .modal.open{display:flex}
+
+    .sheet{
+      width:100%;
+      max-height:92vh;
+      overflow:auto;
+      background:#fff;
+      border-radius:24px 24px 0 0;
+      padding:16px;
+      padding-bottom:max(22px,env(safe-area-inset-bottom));
+    }
+
+    .sheet-inner{max-width:720px;margin:auto}
+
+    .sheet-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .sheet-head h2{margin:0;font-size:21px}
+
+    .icon-btn{
+      border:0;
+      background:#f3f4f6;
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      font-size:20px;
+    }
+
+    .cart-list{display:flex;flex-direction:column;gap:10px}
+
+    .cart-item{
+      display:grid;
+      grid-template-columns:46px 1fr auto;
+      gap:10px;
+      align-items:center;
+      border:1px solid var(--border);
+      border-radius:15px;
+      padding:10px;
+    }
+
+    .cart-media{
+      width:46px;
+      height:46px;
+      border-radius:12px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--green-soft);
+    }
+    .cart-img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .cart-emoji{
+      font-size:25px;
+      line-height:1;
+    }
+
+    .cart-name{font-weight:700}
+    .cart-sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+    .qty{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-top:7px;
+    }
+
+    .qty button{
+      width:28px;height:28px;border-radius:9px;
+      border:1px solid var(--border);background:#fff;
+    }
+
+    .remove{
+      border:0;background:transparent;color:var(--red);font-size:12px;padding:6px;
+    }
+
+    .summary{
+      margin-top:14px;
+      border-top:1px solid var(--border);
+      padding-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .sum-row{display:flex;justify-content:space-between}
+    .sum-total{font-size:19px;font-weight:850;color:var(--green-dark)}
+
+    .primary{
+      width:100%;
+      border:0;
+      background:var(--green);
+      color:#fff;
+      border-radius:15px;
+      padding:13px 16px;
+      font-weight:800;
+      margin-top:14px;
+    }
+
+    .primary:disabled{opacity:.55;cursor:not-allowed}
+
+    .secondary{
+      width:100%;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      border-radius:15px;
+      padding:12px 16px;
+      font-weight:700;
+      margin-top:9px;
+    }
+
+    .form{display:grid;gap:12px}
+    .field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+    .field input,.field textarea{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 13px;
+      outline:none;
+      background:#fff;
+    }
+    .field textarea{min-height:84px;resize:vertical}
+    .field input:focus,.field textarea:focus{border-color:var(--green)}
+
+    .notice{
+      background:#fff8e6;
+      border:1px solid #f8d78c;
+      color:#7a4b00;
+      border-radius:14px;
+      padding:11px 12px;
+      font-size:12px;
+      line-height:1.5;
+      margin-top:12px;
+    }
+
+    .success{
+      text-align:center;
+      padding:24px 6px;
+    }
+
+    .success .big{font-size:58px}
+    .success h3{font-size:22px;margin:8px 0}
+    .success p{color:var(--muted);line-height:1.55}
+
+    @media(min-width:680px){
+      .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .food-image{height:145px}
+      .modal{align-items:center;padding:20px}
+      .sheet{border-radius:24px;max-width:720px;margin:auto}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="logo"><img src="images/gaolong-logo.png" alt="GAOLONG logo" /></div>
+      <div class="brand">
+        <h1>GAOLONG • 高龙</h1>
+        <p>ម្ហូបស៊ីឈួន • Sichuan Cuisine</p>
+      </div>
+      <button class="cart-top" id="cartTop" aria-label="បើកកន្ត្រក">🛒 <span id="topCount">0</span></button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-box">
+      <h2>សូមស្វាគមន៍មកកាន់ GAOLONG 🌶️</h2>
+      <p>ជ្រើសរើសម្ហូបដែលអ្នកចូលចិត្ត ដាក់ចូលកន្ត្រក ហើយកម្ម៉ង់បានភ្លាមៗ។</p>
+    </div>
+  </section>
+
+  <div class="search-wrap">
+    <input class="search" id="searchInput" type="search" placeholder="🔎 ស្វែងរកមុខម្ហូប..." />
+  </div>
+
+  <nav class="categories" id="categories" aria-label="ប្រភេទមុខម្ហូប"></nav>
+
+  <main class="section">
+    <div class="section-head">
+      <h2>បញ្ជីមុខម្ហូប</h2>
+      <span id="resultCount"></span>
+    </div>
+    <div class="grid" id="foodGrid"></div>
+  </main>
+
+  <button class="cart-bar" id="cartBar">
+    <span>🛒 មើលកន្ត្រក (<span id="barCount">0</span>)</span>
+    <span id="barTotal">$0.00</span>
+  </button>
+
+  <div class="modal" id="cartModal" aria-hidden="true">
+    <div class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <h2>🛒 កន្ត្រករបស់អ្នក</h2>
+          <button class="icon-btn" data-close="cartModal" aria-label="បិទ">×</button>
+        </div>
+        <div class="cart-list" id="cartList"></div>
+        <div class="summary">
+          <div class="sum-row"><span>តម្លៃមុខម្ហូប</span><strong id="subtotal">$0.00</strong></div>
+          <div class="sum-row sum-total"><span>សរុប</span><span id="grandTotal">$0.00</span></div>
+        </div>
+        <button class="primary" id="checkoutBtn">បន្តទៅ Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="checkoutModal" aria-hidden="true">
+    <div class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <h2>📦 ព័ត៌មានបញ្ជាទិញ</h2>
+          <button class="icon-btn" data-close="checkoutModal" aria-label="បិទ">×</button>
+        </div>
+
+        <div id="checkoutContent">
+          <div class="form">
+            <div class="field">
+              <label for="customerName">ឈ្មោះអតិថិជន *</label>
+              <input id="customerName" autocomplete="name" placeholder="បញ្ចូលឈ្មោះ" />
+            </div>
+            <div class="field">
+              <label for="phone">លេខទូរស័ព្ទ (មិនបង្ខំ)</label>
+              <input id="phone" inputmode="tel" autocomplete="tel" placeholder="012 345 678" />
+            </div>
+            <div class="field">
+              <label for="tableNumber">លេខតុ *</label>
+              <input id="tableNumber" inputmode="text" placeholder="ឧ. A01 / VIP02" />
+            </div>
+            <div class="field">
+              <label for="note">កំណត់ចំណាំ</label>
+              <textarea id="note" placeholder="ឧ. មិនដាក់ហឹរ / ដាក់បន្លែច្រើន..."></textarea>
+            </div>
+          </div>
+
+          <div class="notice">
+            ពេលចុចបញ្ជាក់ Order នឹងផ្ញើចូល Telegram Group “GAOLONG Order” ដោយស្វ័យប្រវត្តិ។
+          </div>
+
+          <button class="primary" id="placeOrderBtn">✅ បញ្ជាក់ការបញ្ជាទិញ</button>
+          <button class="secondary" id="backToCartBtn">ត្រឡប់ទៅកន្ត្រក</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  const ORDER_API_URL = "https://gaolongorder.chanrady1003.workers.dev/";
+
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    try {
+      document.documentElement.style.setProperty("--bg", tg.themeParams.bg_color || "#f6f7f8");
+      document.documentElement.style.setProperty("--card", tg.themeParams.secondary_bg_color || "#ffffff");
+      document.documentElement.style.setProperty("--text", tg.themeParams.text_color || "#17211b");
+      document.documentElement.style.setProperty("--muted", tg.themeParams.hint_color || "#6b7280");
+      document.documentElement.style.setProperty("--green", tg.themeParams.button_color || "#c62828");
+    } catch (e) {}
+  }
+
+  // GAOLONG MENU — កែឈ្មោះ តម្លៃ រូបភាព និងពិពណ៌នានៅទីនេះ
+  // ពេលមានរូប សរសេរ image:"images/ឈ្មោះរូប.jpg"។ បើមិនទាន់មានរូប ទុក image:"" ហើយ Emoji នឹងបង្ហាញជំនួស។
+  const foods = [
+    {id:1, name:"ម៉ាឡាហតផត", category:"ហតផត", price:12.00, image:"", emoji:"🌶️", desc:"ហតផតស៊ីឈួនរសជាតិហឹរ ឈ្ងុយ និងសម្បូរគ្រឿង"},
+    {id:2, name:"ត្រីស្ងោរម្ទេសស៊ីឈួន", category:"ត្រី", price:9.50, image:"", emoji:"🐟", desc:"ត្រីទន់ជាមួយទឹកស៊ុបម្ទេស និងម្រេចស៊ីឈួន"},
+    {id:3, name:"សាច់គោឆាម្ទេស", category:"សាច់", price:7.50, image:"", emoji:"🥩", desc:"សាច់គោឆាម្ទេសក្រហម ក្រអូប និងហឹរឆ្ងាញ់"},
+    {id:4, name:"មាន់គង់ប៉ាវ", category:"សាច់", price:6.50, image:"", emoji:"🍗", desc:"មាន់ឆាជាមួយម្ទេស សណ្តែកដី និងទឹកជ្រលក់ពិសេស"},
+    {id:5, name:"មីស៊ីឈួន", category:"មី", price:4.50, image:"", emoji:"🍜", desc:"មីរសជាតិហឹរ ក្រអូបប្រេងម្ទេស និងម្រេចស៊ីឈួន"},
+    {id:6, name:"បាយឆាស៊ីឈួន", category:"បាយ", price:4.00, image:"", emoji:"🍚", desc:"បាយឆាក្រអូប ជាមួយសាច់ បន្លែ និងគ្រឿងស៊ីឈួន"},
+    {id:7, name:"ត្រកួនឆាខ្ទឹម", category:"បន្លែ", price:3.00, image:"", emoji:"🥬", desc:"ត្រកួនស្រស់ឆាខ្ទឹម ក្រអូប និងរសជាតិស្រាល"},
+    {id:8, name:"ទឹកតែចិន", category:"ភេសជ្ជៈ", price:1.50, image:"", emoji:"🍵", desc:"តែចិនក្តៅ ឬត្រជាក់ សម្រាប់ផឹកជាមួយម្ហូបហឹរ"}
+  ];
+
+  const categories = ["ទាំងអស់","ហតផត","ត្រី","សាច់","មី","បាយ","បន្លែ","ភេសជ្ជៈ"];
+  let selectedCategory = "ទាំងអស់";
+  let searchText = "";
+  let cart = {};
+
+  const money = n => "$" + n.toFixed(2);
+  const byId = id => foods.find(f => f.id === Number(id));
+  const imageUrl = path => path ? encodeURI(path) : "";
+
+  function renderCategories(){
+    const box = document.getElementById("categories");
+    box.innerHTML = categories.map(cat =>
+      `<button class="chip ${cat===selectedCategory?"active":""}" data-category="${cat}">${cat}</button>`
+    ).join("");
+  }
+
+  function filteredFoods(){
+    return foods.filter(food => {
+      const catOk = selectedCategory === "ទាំងអស់" || food.category === selectedCategory;
+      const textOk = food.name.toLowerCase().includes(searchText) ||
+                     food.desc.toLowerCase().includes(searchText);
+      return catOk && textOk;
+    });
+  }
+
+  function renderFoods(){
+    const list = filteredFoods();
+    document.getElementById("resultCount").textContent = `${list.length} មុខ`;
+
+    document.getElementById("foodGrid").innerHTML = list.length
+      ? list.map(food => {
+          const img = food.image
+            ? `<img src="${imageUrl(food.image)}" class="food-img" alt="${food.name}" loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+            : "";
+          const fallbackStyle = food.image ? "display:none;" : "display:flex;";
+          return `
+            <article class="food-card">
+              <div class="food-image">
+                ${img}
+                <div class="food-emoji" style="${fallbackStyle}">${food.emoji || "🍽️"}</div>
+              </div>
+              <div class="food-body">
+                <span class="food-category">${food.category}</span>
+                <div class="food-name">${food.name}</div>
+                <div class="food-desc">${food.desc}</div>
+                <div class="food-bottom">
+                  <div class="price">${money(food.price)}</div>
+                  <button class="add-btn" data-add="${food.id}">+ ដាក់កន្ត្រក</button>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("")
+      : `<div class="empty">រកមិនឃើញមុខម្ហូបដែលអ្នកស្វែងរកទេ។</div>`;
+  }
+
+  function cartItems(){
+    return Object.entries(cart)
+      .filter(([,qty]) => qty > 0)
+      .map(([id,qty]) => ({food:byId(id), qty}));
+  }
+
+  function cartCount(){
+    return cartItems().reduce((sum,item) => sum + item.qty, 0);
+  }
+
+  function subtotal(){
+    return cartItems().reduce((sum,item) => sum + item.food.price * item.qty, 0);
+  }
+
+  function deliveryFee(){
+    return 0;
+  }
+
+  function total(){
+    return subtotal();
+  }
+
+  function updateCartUI(){
+    const count = cartCount();
+    document.getElementById("topCount").textContent = count;
+    document.getElementById("barCount").textContent = count;
+    document.getElementById("barTotal").textContent = money(total());
+    document.getElementById("cartBar").style.display = count ? "flex" : "none";
+
+    const list = cartItems();
+    document.getElementById("cartList").innerHTML = list.length
+      ? list.map(({food,qty}) => {
+          const img = food.image
+            ? `<img src="${imageUrl(food.image)}" class="cart-img" alt="${food.name}" loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">`
+            : "";
+          const fallbackStyle = food.image ? "display:none;" : "display:block;";
+          return `
+            <div class="cart-item">
+              <div class="cart-media">
+                ${img}
+                <div class="cart-emoji" style="${fallbackStyle}">${food.emoji || "🍽️"}</div>
+              </div>
+              <div>
+                <div class="cart-name">${food.name}</div>
+                <div class="cart-sub">${money(food.price)} × ${qty} = ${money(food.price*qty)}</div>
+                <div class="qty">
+                  <button data-minus="${food.id}">−</button>
+                  <strong>${qty}</strong>
+                  <button data-plus="${food.id}">+</button>
+                </div>
+              </div>
+              <button class="remove" data-remove="${food.id}">លុប</button>
+            </div>
+          `;
+        }).join("")
+      : `<div class="empty">កន្ត្រករបស់អ្នកនៅទទេ។</div>`;
+
+    document.getElementById("subtotal").textContent = money(subtotal());
+    document.getElementById("grandTotal").textContent = money(total());
+    document.getElementById("checkoutBtn").disabled = !count;
+  }
+
+  function add(id){
+    cart[id] = (cart[id] || 0) + 1;
+    updateCartUI();
+    tg?.HapticFeedback?.impactOccurred("light");
+  }
+
+  function changeQty(id, delta){
+    cart[id] = Math.max(0,(cart[id] || 0) + delta);
+    if (!cart[id]) delete cart[id];
+    updateCartUI();
+  }
+
+  function openModal(id){
+    document.getElementById(id).classList.add("open");
+    document.getElementById(id).setAttribute("aria-hidden","false");
+  }
+
+  function closeModal(id){
+    document.getElementById(id).classList.remove("open");
+    document.getElementById(id).setAttribute("aria-hidden","true");
+  }
+
+  function orderPayload(){
+    const user = tg?.initDataUnsafe?.user;
+    return {
+      type:"gaolong_order",
+      customer:{
+        name:document.getElementById("customerName").value.trim(),
+        phone:document.getElementById("phone").value.trim(),
+        note:document.getElementById("note").value.trim()
+      },
+      table:document.getElementById("tableNumber").value.trim(),
+      orderNumber:`GL-${Date.now().toString().slice(-6)}`,
+      telegram_user:user ? {
+        id:user.id,
+        username:user.username || "",
+        first_name:user.first_name || ""
+      } : null,
+      items:cartItems().map(({food,qty}) => ({
+        id:food.id,
+        name:food.name,
+        price:food.price,
+        qty,
+        amount:Number((food.price*qty).toFixed(2))
+      })),
+      subtotal:Number(subtotal().toFixed(2)),
+      total:Number(total().toFixed(2)),
+      created_at:new Date().toISOString()
+    };
+  }
+
+  async function placeOrder(){
+    const name = document.getElementById("customerName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const table = document.getElementById("tableNumber").value.trim();
+    const button = document.getElementById("placeOrderBtn");
+
+    if(!name || !table){
+      tg?.HapticFeedback?.notificationOccurred("error");
+      alert("សូមបំពេញឈ្មោះ និងលេខតុ។");
+      return;
+    }
+
+    const payload = orderPayload();
+    const originalText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = "កំពុងផ្ញើ Order...";
+
+    try{
+      const response = await fetch(ORDER_API_URL, {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(payload)
+      });
+
+      let result = {};
+      try{
+        result = await response.json();
+      }catch(e){}
+
+      if(!response.ok || !result.ok){
+        throw new Error(result.error || "មិនអាចផ្ញើ Order បាន");
+      }
+
+      tg?.HapticFeedback?.notificationOccurred("success");
+
+      document.getElementById("checkoutContent").innerHTML = `
+        <div class="success">
+          <div class="big">✅</div>
+          <h3>ផ្ញើការបញ្ជាទិញបានជោគជ័យ</h3>
+          <p>លេខតុ៖ <strong>${table}</strong><br>
+          សរុប៖ <strong>${money(payload.total)}</strong><br>
+          បុគ្គលិក GAOLONG បានទទួល Order នៅ Telegram Group រួចហើយ។</p>
+          <button class="primary" id="finishBtn">រួចរាល់</button>
+        </div>
+      `;
+
+      document.getElementById("finishBtn").addEventListener("click", () => {
+        cart = {};
+        updateCartUI();
+        closeModal("checkoutModal");
+        tg?.close();
+      });
+    }catch(error){
+      console.error("Order error:", error);
+      tg?.HapticFeedback?.notificationOccurred("error");
+      alert("ផ្ញើ Order មិនបាន។ សូមពិនិត្យ Internet ហើយសាកម្តងទៀត។");
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+
+  document.addEventListener("click", e => {
+    const addId = e.target.dataset.add;
+    const plusId = e.target.dataset.plus;
+    const minusId = e.target.dataset.minus;
+    const removeId = e.target.dataset.remove;
+    const category = e.target.dataset.category;
+    const closeId = e.target.dataset.close;
+
+    if(addId) add(addId);
+    if(plusId) changeQty(plusId,1);
+    if(minusId) changeQty(minusId,-1);
+    if(removeId){ delete cart[removeId]; updateCartUI(); }
+    if(category){
+      selectedCategory = category;
+      renderCategories();
+      renderFoods();
+    }
+    if(closeId) closeModal(closeId);
+  });
+
+  document.getElementById("searchInput").addEventListener("input", e => {
+    searchText = e.target.value.trim().toLowerCase();
+    renderFoods();
+  });
+
+  document.getElementById("cartTop").addEventListener("click", () => openModal("cartModal"));
+  document.getElementById("cartBar").addEventListener("click", () => openModal("cartModal"));
+
+  document.getElementById("checkoutBtn").addEventListener("click", () => {
+    closeModal("cartModal");
+    openModal("checkoutModal");
+  });
+
+  document.getElementById("backToCartBtn").addEventListener("click", () => {
+    closeModal("checkoutModal");
+    openModal("cartModal");
+  });
+
+  document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
+
+  document.querySelectorAll(".modal").forEach(modal => {
+    modal.addEventListener("click", e => {
+      if(e.target === modal) closeModal(modal.id);
+    });
+  });
+
+  renderCategories();
+  renderFoods();
+  updateCartUI();
+</script>
+</body>
+</html>
