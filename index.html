@@ -454,6 +454,114 @@
     .success h3{font-size:22px;margin:8px 0}
     .success p{color:var(--muted);line-height:1.55}
 
+    /* =========================
+       MY ORDERS / ORDER HISTORY
+       ========================= */
+    .activity-section{
+      max-width:920px;
+      margin:16px auto 0;
+      padding:0 16px;
+    }
+
+    .activity-title{
+      margin:0 0 10px;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.08em;
+      color:var(--muted);
+      text-transform:uppercase;
+    }
+
+    .activity-card{
+      width:100%;
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:18px;
+      padding:16px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      text-align:left;
+      box-shadow:0 3px 12px rgba(16,24,40,.05);
+    }
+
+    .activity-icon{
+      width:48px;
+      height:48px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      flex:none;
+      font-size:23px;
+      background:var(--green-soft);
+      color:var(--green-dark);
+    }
+
+    .activity-copy{flex:1;min-width:0}
+    .activity-copy strong{display:block;font-size:16px;color:var(--text)}
+    .activity-copy span{display:block;margin-top:3px;font-size:12px;color:var(--muted)}
+    .activity-arrow{font-size:22px;color:var(--muted)}
+
+    .history-state{
+      padding:26px 14px;
+      text-align:center;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .history-list{display:flex;flex-direction:column;gap:12px}
+
+    .history-card{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:13px;
+      background:#fff;
+    }
+
+    .history-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:9px;
+    }
+
+    .history-order{font-weight:850;color:var(--green-dark)}
+    .history-date{font-size:11px;color:var(--muted);margin-top:3px}
+
+    .history-status{
+      font-size:11px;
+      font-weight:800;
+      border-radius:999px;
+      padding:5px 8px;
+      white-space:nowrap;
+      background:#fff3e8;
+      color:#9a4c00;
+    }
+
+    .history-items{
+      border-top:1px dashed var(--border);
+      border-bottom:1px dashed var(--border);
+      padding:9px 0;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      font-size:12px;
+    }
+
+    .history-item{display:flex;justify-content:space-between;gap:10px}
+    .history-item span:first-child{min-width:0}
+    .history-meta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:9px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .history-total{font-weight:850;color:var(--green-dark);font-size:15px}
+
+
     @media(min-width:680px){
       .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
       .food-image{height:145px}
@@ -479,6 +587,18 @@
       <h2>សូមស្វាគមន៍មកកាន់ហាង GAOLONG SR 🌶️</h2>
       <p>ជ្រើសរើសម្ហូបដែលអ្នកចូលចិត្ត ដាក់ចូលកន្ត្រក កម្ម៉ង់បានភ្លាមៗ។</p>
     </div>
+  </section>
+
+  <section class="activity-section">
+    <div class="activity-title">YOUR ACTIVITY</div>
+    <button class="activity-card" id="myOrdersBtn" type="button">
+      <div class="activity-icon">🧾</div>
+      <div class="activity-copy">
+        <strong>My Orders</strong>
+        <span>មើលប្រវត្តិការបញ្ជាទិញរបស់អ្នក</span>
+      </div>
+      <div class="activity-arrow">›</div>
+    </button>
   </section>
 
   <div class="search-wrap">
@@ -552,6 +672,19 @@
           <button class="primary" id="placeOrderBtn">✅ បញ្ជាក់ការបញ្ជាទិញ</button>
           <button class="secondary" id="backToCartBtn">ត្រឡប់ទៅកន្ត្រក</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="ordersModal" aria-hidden="true">
+    <div class="sheet">
+      <div class="sheet-inner">
+        <div class="sheet-head">
+          <h2>🧾 My Orders</h2>
+          <button class="icon-btn" data-close="ordersModal" aria-label="បិទ">×</button>
+        </div>
+        <div id="ordersContent" class="history-state">កំពុងទាញប្រវត្តិការបញ្ជាទិញ...</div>
+        <button class="secondary" id="refreshOrdersBtn" type="button">↻ Refresh Orders</button>
       </div>
     </div>
   </div>
@@ -771,6 +904,7 @@
 
   function orderPayload(){
     const user = tg?.initDataUnsafe?.user;
+
     return {
       type:"gaolong_order",
       customer:{
@@ -780,11 +914,18 @@
       },
       table:document.getElementById("tableNumber").value.trim(),
       orderNumber:`GL-${Date.now().toString().slice(-6)}`,
+
+      // Flat Telegram fields are used by the Worker + D1 history API.
+      telegram_user_id:user ? String(user.id) : "",
+      telegram_username:user?.username || "",
+
+      // Keep the nested object too, in case we want more profile data later.
       telegram_user:user ? {
         id:user.id,
         username:user.username || "",
         first_name:user.first_name || ""
       } : null,
+
       items:cartItems().map(({food,qty}) => ({
         id:food.id,
         name:food.name,
@@ -796,6 +937,114 @@
       total:Number(total().toFixed(2)),
       created_at:new Date().toISOString()
     };
+  }
+
+  function escapeHtml(value){
+    return String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function formatOrderDate(value){
+    if(!value) return "";
+    const normalized = String(value).includes("T") ? String(value) : String(value).replace(" ","T") + "Z";
+    const d = new Date(normalized);
+    if(Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleString("en-US", {
+      timeZone:"Asia/Phnom_Penh",
+      year:"numeric",
+      month:"short",
+      day:"2-digit",
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+  }
+
+  function statusText(status){
+    const key = String(status || "new").toLowerCase();
+    const labels = {
+      new:"New",
+      preparing:"Preparing",
+      ready:"Ready",
+      completed:"Completed",
+      cancelled:"Cancelled"
+    };
+    return labels[key] || status || "New";
+  }
+
+  async function loadMyOrders(){
+    const box = document.getElementById("ordersContent");
+    const user = tg?.initDataUnsafe?.user;
+
+    if(!user?.id){
+      box.className = "history-state";
+      box.innerHTML = "សូមបើក GAOLONG Mini App តាម Telegram ដើម្បីមើល Order History របស់អ្នក។";
+      return;
+    }
+
+    box.className = "history-state";
+    box.textContent = "កំពុងទាញប្រវត្តិការបញ្ជាទិញ...";
+
+    try{
+      const response = await fetch(
+        `${ORDER_API_URL}orders?telegram_user_id=${encodeURIComponent(user.id)}`
+      );
+      const result = await response.json();
+
+      if(!response.ok || !result.ok){
+        throw new Error(result.error || "Unable to load orders");
+      }
+
+      const orders = Array.isArray(result.orders) ? result.orders : [];
+
+      if(!orders.length){
+        box.className = "history-state";
+        box.innerHTML = "🧾<br><strong>មិនទាន់មាន Order History ទេ</strong><br>Order ថ្មីរបស់អ្នកនឹងបង្ហាញនៅទីនេះ។";
+        return;
+      }
+
+      box.className = "history-list";
+      box.innerHTML = orders.map(order => {
+        const items = Array.isArray(order.items) ? order.items : [];
+        const itemsHtml = items.length
+          ? items.map(item => {
+              const qty = Number(item.qty || 0);
+              const price = Number(item.price || 0);
+              const amount = Number(item.amount ?? (qty * price));
+              return `<div class="history-item"><span>${escapeHtml(item.name || "មុខម្ហូប")} × ${qty}</span><strong>${money(amount)}</strong></div>`;
+            }).join("")
+          : `<div class="history-item"><span>មិនមានព័ត៌មានមុខម្ហូប</span><span></span></div>`;
+
+        return `
+          <article class="history-card">
+            <div class="history-top">
+              <div>
+                <div class="history-order">${escapeHtml(order.order_no || "Order")}</div>
+                <div class="history-date">${escapeHtml(formatOrderDate(order.created_at))}</div>
+              </div>
+              <span class="history-status">${escapeHtml(statusText(order.status))}</span>
+            </div>
+            <div class="history-items">${itemsHtml}</div>
+            <div class="history-meta">
+              <span>តុ: ${escapeHtml(order.table_no || "-")}</span>
+              <span class="history-total">${money(Number(order.total || 0))}</span>
+            </div>
+          </article>`;
+      }).join("");
+
+    }catch(error){
+      console.error("Order history error:", error);
+      box.className = "history-state";
+      box.innerHTML = "មិនអាចទាញ Order History បាន។ សូមពិនិត្យ Internet ហើយសាកម្តងទៀត។";
+    }
+  }
+
+  function openMyOrders(){
+    openModal("ordersModal");
+    loadMyOrders();
   }
 
   async function placeOrder(){
@@ -899,6 +1148,9 @@
     closeModal("checkoutModal");
     openModal("cartModal");
   });
+
+  document.getElementById("myOrdersBtn").addEventListener("click", openMyOrders);
+  document.getElementById("refreshOrdersBtn").addEventListener("click", loadMyOrders);
 
   document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
 
