@@ -1096,11 +1096,12 @@
         </div>
       `;
 
-      document.getElementById("finishBtn").addEventListener("click", () => {
-        cart = {};
-        updateCartUI();
-        closeModal("checkoutModal");
-        tg?.close();
+     document.getElementById("finishBtn").addEventListener("click", () => {
+  cart = {};
+  updateCartUI();
+  closeModal("checkoutModal");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
       });
     }catch(error){
       console.error("Order error:", error);
