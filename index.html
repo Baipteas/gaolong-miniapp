@@ -568,7 +568,72 @@
       .modal{align-items:center;padding:20px}
       .sheet{border-radius:24px;max-width:720px;margin:auto}
     }
-  </style>
+  
+/* ========================================
+   FIX MY ORDERS - CLEAR TEXT
+   ======================================== */
+
+.history-card{
+  background:#ffffff !important;
+  color:#2b1714 !important;
+}
+
+.history-items{
+  border-top:1px dashed #f0d9d1 !important;
+  border-bottom:1px dashed #f0d9d1 !important;
+  padding:10px 0 !important;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  font-size:13px;
+  color:#2b1714 !important;
+}
+
+.history-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  color:#2b1714 !important;
+  line-height:1.5;
+}
+
+.history-item span{
+  color:#2b1714 !important;
+}
+
+.history-item span:first-child{
+  min-width:0;
+  flex:1;
+  font-weight:600;
+}
+
+.history-item strong{
+  flex:none;
+  color:#8e1515 !important;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.history-order{
+  color:#8e1515 !important;
+  font-weight:850;
+}
+
+.history-date{
+  color:#7b625d !important;
+}
+
+.history-meta{
+  color:#7b625d !important;
+}
+
+.history-total{
+  color:#8e1515 !important;
+  font-weight:850;
+}
+
+</style>
 </head>
 <body>
   <header class="topbar">
