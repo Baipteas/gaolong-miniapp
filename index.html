@@ -633,6 +633,23 @@
   font-weight:850;
 }
 
+
+
+/* STORE OPEN / CLOSED STATUS */
+.store-status{
+  flex:none;
+  border:0;
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:.04em;
+  white-space:nowrap;
+}
+.store-status.open{background:#22c55e;color:#fff;}
+.store-status.closed{background:#6b7280;color:#fff;}
+.add-btn:disabled{opacity:.45;cursor:not-allowed;}
+
 </style>
 </head>
 <body>
@@ -643,6 +660,7 @@
         <h1>GAOLONG • SR</h1>
         <p>ស៊ុបហតផតឆ្ងាញ់គឺនៅកៅឡុង • "Where Spice Meets Ice—Sichuan & Beer Delight</p>
       </div>
+      <span class="store-status" id="storeStatus">...</span>
       <button class="cart-top" id="cartTop" aria-label="បើកកន្ត្រក">🛒 <span id="topCount">0</span></button>
     </div>
   </header>
@@ -757,6 +775,39 @@
 <script>
   const tg = window.Telegram?.WebApp;
   const ORDER_API_URL = "https://gaolongorder.chanrady1003.workers.dev/";
+
+  // GAOLONG opening hours — Cambodia time
+  const STORE_OPEN_MINUTES = 14 * 60;       // 2:00 PM
+  const STORE_CLOSE_MINUTES = 22 * 60 + 30; // 10:30 PM
+
+  function cambodiaNowParts(){
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone:"Asia/Phnom_Penh",
+      hour:"2-digit",
+      minute:"2-digit",
+      hourCycle:"h23"
+    }).formatToParts(new Date());
+    const get = type => Number(parts.find(p => p.type === type)?.value || 0);
+    return {hour:get("hour"), minute:get("minute")};
+  }
+
+  function isStoreOpen(){
+    const {hour, minute} = cambodiaNowParts();
+    const nowMinutes = hour * 60 + minute;
+    return nowMinutes >= STORE_OPEN_MINUTES && nowMinutes < STORE_CLOSE_MINUTES;
+  }
+
+  function updateStoreStatus(){
+    const open = isStoreOpen();
+    const badge = document.getElementById("storeStatus");
+    if(badge){
+      badge.textContent = open ? "OPEN" : "CLOSED";
+      badge.classList.toggle("open", open);
+      badge.classList.toggle("closed", !open);
+      badge.title = open ? "បើកហើយ • អាចកម្ម៉ង់បាន" : "បិទហើយ • ម៉ោងបើក 2:00 PM–10:30 PM";
+    }
+    renderFoods();
+  }
 
   if (tg) {
     tg.ready();
@@ -873,7 +924,7 @@
                 <div class="food-desc">${food.desc}</div>
                 <div class="food-bottom">
                   <div class="price">${money(food.price)}</div>
-                  <button class="add-btn" data-add="${food.id}">+ ដាក់កន្ត្រក</button>
+                  <button class="add-btn" data-add="${food.id}" ${isStoreOpen() ? "" : "disabled"}>${isStoreOpen() ? "+ ដាក់កន្ត្រក" : "CLOSED"}</button>
                 </div>
               </div>
             </article>
@@ -946,6 +997,11 @@
   }
 
   function add(id){
+    if(!isStoreOpen()){
+      tg?.HapticFeedback?.notificationOccurred("error");
+      alert("ហាងបិទហើយ។ ម៉ោងបើក 2:00 PM ដល់ 10:30 PM។");
+      return;
+    }
     cart[id] = (cart[id] || 0) + 1;
     updateCartUI();
     tg?.HapticFeedback?.impactOccurred("light");
@@ -1113,6 +1169,12 @@
   }
 
   async function placeOrder(){
+    if(!isStoreOpen()){
+      tg?.HapticFeedback?.notificationOccurred("error");
+      alert("ហាងបិទហើយ។ អាចកម្ម៉ង់បានចាប់ពីម៉ោង 2:00 PM ដល់ 10:30 PM។");
+      return;
+    }
+
     const name = document.getElementById("customerName").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const table = document.getElementById("tableNumber").value.trim();
@@ -1226,8 +1288,9 @@
   });
 
   renderCategories();
-  renderFoods();
+  updateStoreStatus();
   updateCartUI();
+  setInterval(updateStoreStatus, 30000);
 </script>
 </body>
 </html>
